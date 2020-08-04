@@ -1,0 +1,23 @@
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                      SNAKE
+                   This is demo game written on assembler masm.
+                                      Rules:
+                            1.Touch borders - game over.
+                            2.Touch tail    - game over.
+                          3.Eat fruit for increase scores.
+                          
+                                     Controls:
+                                      w - up
+                                      s - down
+                                      a - left
+                                      d - right
+                                      
+                                    Programming:
+                                   ILLIA FOMENKO
