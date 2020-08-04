@@ -4,9 +4,11 @@
 #define TAKED_FOOD 101
 #define GAME_OVER 102
 #define PAUSE 103
+#define XM_MUSIC 400
 
 MENU_SELECT WAVE DISCARDABLE "Res/SelectMenu.wav"
 TAKED_FOOD WAVE DISCARDABLE "Res/TakedFood.wav"
 GAME_OVER WAVE DISCARDABLE "Res/GameOver.wav"
 PAUSE WAVE DISCARDABLE "Res/Pause.wav"
+XM_MUSIC RCDATA DISCARDABLE "Res/pulsium_powerium.xm"
 

@@ -4,10 +4,10 @@ DrawTail  proto
 CreateSnake proto
 
 
-TAIL struct
-    x dword ?
-    y dword ?  
-TAIL ends
+;TAIL struct
+;    x dword ?
+;    y dword ?  
+;TAIL ends
 
 .const
 MAX_SPEED       equ 10
@@ -19,7 +19,7 @@ SNAKE_TAIL_CHAR equ 'o'
 .data?
 snake GAME_OBJECT <>
 spd_count   dd ?
-tail        TAIL MAX_TAIL dup(<>)
+tail        OBJECT MAX_TAIL dup(<>)
 nTail       dd ?
 nPickup     dd ?
 
@@ -28,7 +28,7 @@ nPickup     dd ?
 
 .code
 DrawSnake proc uses ebx esi edi   
-    fn Gotoxy,snake.x,snake.y
+    fn Gotoxy,snake.obj.x,snake.obj.y
     fn SetConsoleColor,0,LightCyan  
     movzx eax,byte ptr[snake.sprite]
     fn crt_putchar,eax
@@ -44,7 +44,9 @@ ClearTail proc uses ebx esi edi
   @@In:
     mov dword ptr[esi],0
     mov dword ptr[esi+4],0
-    add esi,sizeof TAIL
+    mov dword ptr[esi+8],0
+    mov dword ptr[esi+12],0
+    add esi,sizeof OBJECT
     inc ebx
     
   @@For:
@@ -70,7 +72,7 @@ DrawTail proc uses ebx esi edi
     fn crt_putchar,SNAKE_TAIL_CHAR
     
     inc ebx
-    add esi,sizeof TAIL
+    add esi,sizeof OBJECT
     
 @@For:
     cmp ebx,nTail

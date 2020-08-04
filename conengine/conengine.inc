@@ -52,7 +52,7 @@ includelib \masm32\lib\fpu.lib
 includelib \masm32\lib\Winmm.lib
 includelib \masm32\minifmod\mfmplayer.lib
 ; ллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
-SetConsoleWindowSize   proto :dword,:dword
+SetConsoleWindowSize   proto :dword,:dword,:dword
 HideConsoleCursor      proto   
 Gotoxy                 proto :dword,:dword
 SetConsoleColor        proto :dword,:dword
@@ -65,6 +65,7 @@ PlayWavSoundFromRes    proto :dword,:dword
 DrawLevel              proto :dword,:dword,:dword
 DrawScore              proto :dword,:dword,:dword,:dword,:dword
 RangedRand             proto :dword,:dword
+PlayXmSound            proto :dword
 
 ;Game object constructor
 CreateObject proto :dword,:dword,:dword,:dword,:dword,\
@@ -87,11 +88,15 @@ LightMagenta     = 13
 cYellow          = 14
 cWhite           = 15
 
-GAME_OBJECT struct
+OBJECT struct
     x         dword ?
     y         dword ?
     xstart    dword ?
-    ystart    dword ?
+    ystart    dword ?   
+OBJECT ends
+
+GAME_OBJECT struct
+    obj       OBJECT <>
     speed     dword ?
     vspeed    dword ?
     hspeed    dword ?
@@ -102,5 +107,14 @@ GAME_OBJECT struct
     sprite    db ?   
 GAME_OBJECT ends
 
+;macros
+putchar macro bAscii
+    fn crt_putchar,bAscii
+endm
+
 .data
 rand_max dq 32768.0
+
+.data?
+hMusic dd ?
+

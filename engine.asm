@@ -5,9 +5,11 @@ DrawEvent              proto
 ShowScore              proto
 DrawPanel              proto
 StepEvent              proto
-GameUpdate             proto
+BeginStepEvent         proto
 GameOver               proto 
 TimeEvent              proto :dword,:dword,:dword,:dword,:dword
+LoadGameEvent          proto
+StartGameEvent         proto
 
 .const
 KEY_ENTER           equ 13
@@ -32,7 +34,7 @@ szGameOver   db "GAME OVER",0
 szBack       db "Press ENTER to back menu",0
 
 .code
-GameInit proc uses ebx esi edi
+StartGameEvent proc uses ebx esi edi
     fn crt_srand,rv(crt_time,0) 
        
     .if nLevel == 1
@@ -44,12 +46,12 @@ GameInit proc uses ebx esi edi
     fn DrawPanel
     fn SetConsoleColor,0,LightGreen
     fn Gotoxy,1,37
-    fn crt_printf,"Score: "
+    fn crt_printf,offset szScore
     print ustr$(score)
     fn CreateSnake
     fn CreateFruit
     .if bPlay == 0
-        fn mfmPlay,offset music
+        fn PlayXmSound,XM_MUSIC_RES
         inc bPlay
     .else
         fn mfmPause
@@ -69,9 +71,10 @@ GameInit proc uses ebx esi edi
     fn Sleep,2000
     jmp @@Ret
     
-GameInit endp
+StartGameEvent endp
 
 GameController proc uses ebx edi esi
+    fn BeginStepEvent
     fn KeyEvent
     fn DrawEvent
     fn StepEvent
@@ -157,12 +160,12 @@ StepEvent proc uses ebx esi edi
       @@In2:  
         mov eax,dword ptr[esi]
         mov edx,dword ptr[esi+4]
-        .if eax == snake.x && edx == snake.y
+        .if eax == snake.obj.x && edx == snake.obj.y
            jmp @@GameOver          
         .endif
         
         inc ebx
-        add esi,sizeof TAIL
+        add esi,sizeof OBJECT
         
       @@For2:  
         cmp ebx,nTail
@@ -173,59 +176,53 @@ StepEvent proc uses ebx esi edi
 	ret
 StepEvent endp
 
-GameUpdate proc uses ebx esi edi
+BeginStepEvent proc uses ebx esi edi
     local x:dword
     local y:dword
-    local xprev:dword
-    local yprev:dword
-    local xtemp:dword
-    local ytemp:dword
+    local lpObj:dword
     
     inc spd_count
     mov eax,spd_count
     
     .if eax >= snake.speed
-        mov eax,snake.x
+        mov eax,snake.obj.x
         mov dword ptr[x],eax
-        mov eax,snake.y
+        mov eax,snake.obj.y
         mov dword ptr[y],eax
         .if nTail > 0
             lea esi,tail
             mov eax,dword ptr[esi]
-            mov dword ptr[xprev],eax
+            mov dword ptr[esi+8],eax  ;xstart
             mov eax,dword ptr[esi+4]
-            mov dword ptr[yprev],eax
+            mov dword ptr[esi+12],eax ;ystart
             mov eax,dword ptr[x]
             mov dword ptr[esi],eax
             mov eax,dword ptr[y]
             mov dword ptr[esi+4],eax
-            fn Gotoxy,xprev,yprev
-            fn crt_putchar,20h
-            
+            mov eax,dword ptr[esi+8]
+            mov edx,dword ptr[esi+12] 
+            fn Gotoxy,eax,edx
+            putchar 20h
+            mov dword ptr[lpObj],esi
             xor ebx,ebx
             inc ebx
-            add esi,sizeof TAIL
+            add esi,sizeof OBJECT
             jmp @@For
             
           @@In:
+            mov edi,dword ptr[lpObj]
             mov eax,dword ptr[esi]
-            mov dword ptr[xtemp],eax
-            mov eax,dword ptr[esi+4]
-            mov dword ptr[ytemp],eax
-            fn Gotoxy,xtemp,ytemp
-            fn crt_putchar,20h
-            mov eax,dword ptr[xprev]
+            mov dword ptr[esi+8],eax
+            mov edx,dword ptr[esi+4]
+            mov dword ptr[esi+12],edx
+            fn Gotoxy,eax,edx
+            putchar 20h
+            mov eax,dword ptr[edi+8]
             mov dword ptr[esi],eax
-            mov eax,dword ptr[yprev]
+            mov eax,dword ptr[edi+12]
             mov dword ptr[esi+4],eax
-            
-            mov eax,dword ptr[xtemp]
-            mov dword ptr[xprev],eax
-            
-            mov eax,dword ptr[ytemp]
-            mov dword ptr[yprev],eax
-            
-            add esi,sizeof TAIL
+            mov dword ptr[lpObj],esi                    
+            add esi,sizeof OBJECT
             inc ebx
             
           @@For:
@@ -233,8 +230,8 @@ GameUpdate proc uses ebx esi edi
             jb @@In
         .endif
         
-        fn Gotoxy,snake.x,snake.y
-        fn crt_putchar,20h
+        fn Gotoxy,snake.obj.x,snake.obj.y
+        putchar 20h
         
         .if snake.direction == 'w'
             mov eax,dword ptr[y]
@@ -243,7 +240,7 @@ GameUpdate proc uses ebx esi edi
             ;пусто или фрукт
             .if al == 20h || al == fruit.sprite
             
-                dec dword ptr[snake.y]
+                dec dword ptr[snake.obj.y]
             
             ;столкновение со стеной      
             .elseif al == '#'
@@ -258,7 +255,7 @@ GameUpdate proc uses ebx esi edi
             ;пусто или фрукт
             .if al == 20h || al == fruit.sprite
             
-                inc dword ptr[snake.y]
+                inc dword ptr[snake.obj.y]
             
             ;столкновение со стеной      
             .elseif al == '#'
@@ -273,7 +270,7 @@ GameUpdate proc uses ebx esi edi
             ;пусто или фрукт
             .if al == 20h || al == fruit.sprite
             
-                dec dword ptr[snake.x]
+                dec dword ptr[snake.obj.x]
              
              ;столкновение со стеной   
             .elseif al == '#'
@@ -288,7 +285,7 @@ GameUpdate proc uses ebx esi edi
             ;пусто или фрукт
             .if al == 20h || al == fruit.sprite
             
-                inc dword ptr[snake.x]
+                inc dword ptr[snake.obj.x]
             
             ;столкновение со стеной      
             .elseif al == '#'
@@ -301,9 +298,9 @@ GameUpdate proc uses ebx esi edi
     .endif  
         
     ;ловим фрукт
-    mov eax,snake.x
-    mov ebx,snake.y
-    .if eax == fruit.x && ebx == fruit.y
+    mov eax,snake.obj.x
+    mov ebx,snake.obj.y
+    .if eax == fruit.obj.x && ebx == fruit.obj.y
         .if nTail < MAX_TAIL
             ;увеличиваем хвост и счет
             inc nTail
@@ -316,7 +313,7 @@ GameUpdate proc uses ebx esi edi
     .endif
     
 	ret
-GameUpdate endp
+BeginStepEvent endp
 
 GameOver proc uses ebx esi edi
     fn timeKillEvent,id_timer
@@ -328,8 +325,15 @@ GameOver proc uses ebx esi edi
     inc ebx
     mov edi,41
     
+    ;центральна€ надпись
+    fn SetConsoleColor,0,LightGreen
+    fn Gotoxy,35,21
+    fn crt_puts,offset szScore
+    fn Gotoxy,42,21
+    print ustr$(score)
+    
 @@Do:
-   
+    ;верхн€€ надпись 
     fn SetConsoleColor,0,cBrown    
     fn Gotoxy,35,ebx
     fn crt_puts,offset szGameOver
@@ -337,13 +341,13 @@ GameOver proc uses ebx esi edi
     fn Gotoxy,35,ebx
     fn crt_puts,"         "
     inc ebx
-   
+    ;нижн€€ надпись
     fn SetConsoleColor,0,cWhite
-    fn Gotoxy,26,edi
+    fn Gotoxy,28,edi
     fn crt_printf,offset szBack
     inc edi
-    fn Gotoxy,26,edi
-    fn crt_printf,"                                "
+    fn Gotoxy,28,edi
+    fn crt_printf,"                        "
     dec edi
 
     fn Sleep,400
@@ -357,15 +361,20 @@ GameOver proc uses ebx esi edi
     cmp al,KEY_ENTER
     jne @@L0
     mov byte ptr[gameOver],0
-    mov dword ptr [score],0   
+    mov dword ptr[score],0   
     fn PlayWavSoundFromRes,MENU_SELECT_WAV_RES,0
     
 	ret
 GameOver endp
 
 TimeEvent proc uses ebx esi edi idTimer:dword,uMsg:dword,dwUser:dword,Res1:dword,Res2:dword
-    fn GameUpdate
     fn GameController     
     
 	ret
 TimeEvent endp
+
+LoadGameEvent proc uses ebx esi edi
+    
+	ret
+LoadGameEvent endp
+
