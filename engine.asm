@@ -12,8 +12,6 @@ LoadGameEvent          proto
 StartGameEvent         proto
 
 .const
-KEY_ENTER           equ 13
-KEY_ESC             equ 27
 MENU_SELECT_WAV_RES equ 100
 FOOD_TAKED_WAV_RES  equ 101
 LOSE_WAV_RES        equ 102
@@ -22,7 +20,7 @@ MAX_STEP            equ 30
 STOP                equ 30h
 
 .data
-bKey         db 30h
+bKey         db 31h
 bPlay        db 0
 gameOver     db 0
 closeConsole db 0
@@ -38,7 +36,8 @@ StartGameEvent proc uses ebx esi edi
     fn crt_srand,rv(crt_time,0) 
        
     .if nLevel == 1
-        fn DrawLevel,offset szLevel_1,0,cYellow
+        ;fn DrawLevel,offset szLevel_1,0,cYellow
+        fn printResTxt,LVL_1_TXT_RES,0,cYellow
     .endif
     
     or eax,eax
@@ -77,33 +76,32 @@ GameController proc uses ebx edi esi
     fn BeginStepEvent
     fn KeyEvent
     fn DrawEvent
-    fn StepEvent
-    
+    fn StepEvent   
+
 	ret
 GameController endp
 
-KeyEvent proc uses ebx esi edi
-    mov byte ptr[bKey],31h
+KeyEvent proc uses ebx esi edi   
     fn Keyboard_check
     mov byte ptr[bKey],al
+    
     ;выход
-    .if byte ptr[bKey] == KEY_ESC
+    .if bKey == _ESC
         fn timeKillEvent,id_timer
         fn mfmPause
         mov byte ptr[gameOver],0
         mov dword ptr[score],0
     ;пауза    
-    .elseif byte ptr[bKey] == 'p'
+    .elseif bKey == b_p
         fn timeKillEvent,id_timer
         fn PlayWavSoundFromRes,PAUSE_WAV_RES,0
-        fn GamePause,37,18,0
+        fn GamePause,37,18,0,b_p
         fn timeSetEvent,MAX_STEP,0,offset TimeEvent,0,1
         mov dword ptr[id_timer],eax
     ;движение    
-    .elseif byte ptr[bKey] == 'w' || byte ptr[bKey] == 'a' || \
-            byte ptr[bKey] == 's' || byte ptr[bKey] == 'd'
-        mov byte ptr[snake.direction],al
-        
+    .elseif bKey == b_w || bKey == b_a || \
+            bKey == b_s || bKey == b_d
+            mov dword ptr[snake.direction],eax
     .endif
 	ret
 KeyEvent endp
@@ -140,18 +138,17 @@ StepEvent proc uses ebx esi edi
     .if nPickup == SPD_STEP
         mov nPickup,0
         dec snake.speed
-        .if snake.speed <=0
+        .if snake.speed <= 0
             mov snake.speed,MAX_SPEED
         .endif
     .endif
-    
+    ;врезались в стену
     .if snake.direction == STOP    
       @@GameOver:        
         fn GameOver      
         jmp @@Ret   
-    .endif
-    
-    ;ловим свой хвост
+    .endif  
+    ;врезались в свой хвост
     .if nTail > 0
         lea esi,tail
         xor ebx,ebx
@@ -233,10 +230,12 @@ BeginStepEvent proc uses ebx esi edi
         fn Gotoxy,snake.obj.x,snake.obj.y
         putchar 20h
         
-        .if snake.direction == 'w'
+        .if dword ptr[snake.direction] == b_w
+              
             mov eax,dword ptr[y]
             dec eax
-            fn CheckCursorPosition,x,eax
+            fn CheckCursorPosition,x,eax            
+            
             ;пусто или фрукт
             .if al == 20h || al == fruit.sprite
             
@@ -244,11 +243,10 @@ BeginStepEvent proc uses ebx esi edi
             
             ;столкновение со стеной      
             .elseif al == '#'
-                mov byte ptr[snake.direction],STOP
-                
+                mov byte ptr[snake.direction],STOP                                            
             .endif
         
-        .elseif snake.direction == 's'
+        .elseif snake.direction == b_s
             mov eax,dword ptr[y]
             inc eax
             fn CheckCursorPosition,x,eax
@@ -259,11 +257,11 @@ BeginStepEvent proc uses ebx esi edi
             
             ;столкновение со стеной      
             .elseif al == '#'
-                mov byte ptr[snake.direction],STOP
+                mov dword ptr[snake.direction],STOP
                 
             .endif
             
-        .elseif snake.direction == 'a'
+        .elseif snake.direction == b_a
             mov eax,dword ptr[x]
             dec eax
             fn CheckCursorPosition,eax,y
@@ -274,11 +272,11 @@ BeginStepEvent proc uses ebx esi edi
              
              ;столкновение со стеной   
             .elseif al == '#'
-                mov byte ptr[snake.direction],STOP
+                mov dword ptr[snake.direction],STOP
                 
             .endif
             
-        .elseif snake.direction == 'd'    
+        .elseif snake.direction == b_d    
             mov eax,dword ptr[x]
             inc eax
             fn CheckCursorPosition,eax,y
@@ -289,7 +287,7 @@ BeginStepEvent proc uses ebx esi edi
             
             ;столкновение со стеной      
             .elseif al == '#'
-                mov byte ptr[snake.direction],STOP
+                mov dword ptr[snake.direction],STOP
                 
             .endif
         .endif
@@ -358,7 +356,7 @@ GameOver proc uses ebx esi edi
     
 @@L0:    
     fn Keyboard_check_pressed
-    cmp al,KEY_ENTER
+    cmp al,_ENTER
     jne @@L0
     mov byte ptr[gameOver],0
     mov dword ptr[score],0   
@@ -368,7 +366,7 @@ GameOver proc uses ebx esi edi
 GameOver endp
 
 TimeEvent proc uses ebx esi edi idTimer:dword,uMsg:dword,dwUser:dword,Res1:dword,Res2:dword
-    fn GameController     
+    fn GameController
     
 	ret
 TimeEvent endp
@@ -377,4 +375,3 @@ LoadGameEvent proc uses ebx esi edi
     
 	ret
 LoadGameEvent endp
-

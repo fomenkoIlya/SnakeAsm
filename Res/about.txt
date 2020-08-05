@@ -18,6 +18,7 @@
                                       s - down
                                       a - left
                                       d - right
+                                      p - PAUSE
                                       
                                     Programming:
                                    ILLIA FOMENKO

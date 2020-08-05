@@ -6,23 +6,23 @@ include interface.asm
 
 .code
 start:
-    fn SetConsoleTitle,"Snake game"
-    fn SetConsoleWindowSize,MAX_WIDTH,MAX_HEIGHT,0
-    fn HideConsoleCursor
-    fn Main 
-    exit
+
+fn SetConsoleTitle,"Snake game"
+fn SetConsoleWindowSize,MAX_WIDTH,MAX_HEIGHT,0
+fn HideConsoleCursor
+fn Main 
+exit
     
-Main proc
+Main proc   
     fn MainMenu 
-    fn LoadGameEvent
-    
+
     .while closeConsole == 0
-        fn StartGameEvent     
-        .while gameOver == 1        
+        fn StartGameEvent                   
+        .while gameOver == 1   
+                
         .endw  
-             
+          
         fn MainMenu
-        fn LoadGameEvent
     .endw
       
     ret

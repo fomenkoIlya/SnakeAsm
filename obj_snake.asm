@@ -1,13 +1,7 @@
-DrawSnake proto
-ClearTail proto
-DrawTail  proto
+DrawSnake   proto
+ClearTail   proto
+DrawTail    proto
 CreateSnake proto
-
-
-;TAIL struct
-;    x dword ?
-;    y dword ?  
-;TAIL ends
 
 .const
 MAX_SPEED       equ 10
@@ -32,7 +26,7 @@ DrawSnake proc uses ebx esi edi
     fn SetConsoleColor,0,LightCyan  
     movzx eax,byte ptr[snake.sprite]
     fn crt_putchar,eax
-      
+ 
 	ret
 DrawSnake endp
 
@@ -83,7 +77,7 @@ DrawTail proc uses ebx esi edi
 DrawTail endp
 
 CreateSnake proc uses ebx esi edi  
-    fn CreateObject,offset snake,40,20,MAX_SPEED,0,0,0,31h,0,0,SNAKE_HEAD_CHAR   
+    fn CreateObject,offset snake,40,20,MAX_SPEED,31h,0,0,0,0,0,SNAKE_HEAD_CHAR   
     mov dword ptr[score],0
     mov dword ptr[score_old],0
     fn ClearTail

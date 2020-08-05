@@ -57,7 +57,7 @@ HideConsoleCursor      proto
 Gotoxy                 proto :dword,:dword
 SetConsoleColor        proto :dword,:dword
 CheckCursorPosition    proto :dword,:dword
-GamePause              proto :dword,:dword,:dword
+GamePause              proto :dword,:dword,:dword,:dword
 Keyboard_check_pressed proto
 Keyboard_check         proto
 PlayWavSound           proto :dword,:dword
@@ -66,7 +66,8 @@ DrawLevel              proto :dword,:dword,:dword
 DrawScore              proto :dword,:dword,:dword,:dword,:dword
 RangedRand             proto :dword,:dword
 PlayXmSound            proto :dword
-
+GetKeyKode             proto 
+printResTxt proto :dword,:dword,:dword
 ;Game object constructor
 CreateObject proto :dword,:dword,:dword,:dword,:dword,\
                    :dword,:dword,:dword,:dword,:dword,:dword
@@ -101,7 +102,7 @@ GAME_OBJECT struct
     vspeed    dword ?
     hspeed    dword ?
     gravity   dword ?
-    direction db ?
+    direction dword ?
     lives     db ?
     health    db ?
     sprite    db ?   
@@ -113,8 +114,15 @@ putchar macro bAscii
 endm
 
 .data
+
 rand_max dq 32768.0
+;ir INPUT_RECORD 1 dup(<>)
+szCodeBtn   db "Code: %d",13,10,0
+
 
 .data?
-hMusic dd ?
+ir INPUT_RECORD <>
+hMusic    dd ?
+
+
 

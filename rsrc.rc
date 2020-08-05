@@ -5,10 +5,18 @@
 #define GAME_OVER 102
 #define PAUSE 103
 #define XM_MUSIC 400
+#define MainIcon 200
+#define About_txt 300
+#define Lvl_1_txt 301
+#define StartScreen 302
 
 MENU_SELECT WAVE DISCARDABLE "Res/SelectMenu.wav"
 TAKED_FOOD WAVE DISCARDABLE "Res/TakedFood.wav"
 GAME_OVER WAVE DISCARDABLE "Res/GameOver.wav"
 PAUSE WAVE DISCARDABLE "Res/Pause.wav"
 XM_MUSIC RCDATA DISCARDABLE "Res/pulsium_powerium.xm"
+MainIcon ICON DISCARDABLE "Res/snake.ico"
+About_txt RCDATA DISCARDABLE "Res/about.txt"
+Lvl_1_txt RCDATA DISCARDABLE "Res/Level_1.txt"
+StartScreen RCDATA DISCARDABLE "Res/start_screen.txt"
 
