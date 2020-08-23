@@ -9,6 +9,7 @@
 #define About_txt 300
 #define Lvl_1_txt 301
 #define StartScreen 302
+#define IDD_DLG1001 1001
 
 MENU_SELECT WAVE DISCARDABLE "Res/SelectMenu.wav"
 TAKED_FOOD WAVE DISCARDABLE "Res/TakedFood.wav"
@@ -19,4 +20,12 @@ MainIcon ICON DISCARDABLE "Res/snake.ico"
 About_txt RCDATA DISCARDABLE "Res/about.txt"
 Lvl_1_txt RCDATA DISCARDABLE "Res/Level_1.txt"
 StartScreen RCDATA DISCARDABLE "Res/start_screen.txt"
+
+IDD_DLG1001 DIALOGEX 0,0,216,124
+CAPTION "IDD_DLG1001"
+FONT 8,"MS Sans Serif"
+STYLE 0x10cc0000
+EXSTYLE 0x00000000
+BEGIN
+END
 
